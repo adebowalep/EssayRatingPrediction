@@ -1,0 +1,7 @@
+xlrd
+nltk
+pandas
+matplotlib
+seaborn
+pyspellchecker
+gensim
