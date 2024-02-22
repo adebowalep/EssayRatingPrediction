@@ -20,6 +20,9 @@ def impute_domain_scores(df, strategy='mean'):
         df['domain2_score'] = df['domain2_score'].fillna(df[['rater1_domain2', 'rater2_domain2']].mean(axis=1))
         # drop the rater domain score columns
         df = df.drop(columns=['rater1_domain1', 'rater2_domain1', 'rater3_domain1', 'rater1_domain2', 'rater2_domain2'])
+        
+
+    
     elif strategy == 'pca':
         # Apply PCA and use the first principal component to impute missing values
         pca = PCA(n_components=1)
@@ -31,6 +34,7 @@ def impute_domain_scores(df, strategy='mean'):
         # drop the rater domain score columns
         df = df.drop(columns=['rater1_domain1', 'rater2_domain1', 'rater3_domain1', 'rater1_domain2', 'rater2_domain2'])
     return df
+
 
 # Main training pipeline
 def training_pipeline(df, get_average_vector, domain_score_imputer_strategy='mean'):
