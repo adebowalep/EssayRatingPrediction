@@ -29,6 +29,12 @@ with open("./utils/dale-chall-word-list.txt", "r") as file:
 array_dale_chall =[word.replace(" ", "") for word in array_dale_chall]
 set_dale_chall = set(array_dale_chall)
 
+with open("./utils/words_alpha.txt") as file:
+    lines = file.readlines()
+
+lines_clean = [line.replace("\n", "").lower() for line in lines]
+set_word_check = set(lines_clean)
+
 # Preprocessing
 
 def tokenize_essay(essay):
@@ -160,7 +166,11 @@ def get_pos_tags(tokens):
 
 ## Mispelling score
 
-# Use my previous research to find incorrect words
+def get_incorrect_words(tokens):
+    return [word for word in tokens if word not in set_word_check]
+
+def count_incorrect_words(tokens):
+    return len([word for word in tokens if word not in set_word_check])
 
 ## Slur usage
 
@@ -169,4 +179,3 @@ def get_pos_tags(tokens):
 ## Overusage of punctuation
 
 # Count the number of punctuation
-
