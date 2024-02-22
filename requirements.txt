@@ -7,3 +7,5 @@ pyspellchecker
 gensim
 pyphen
 spacy
+scikit-learn
+dask

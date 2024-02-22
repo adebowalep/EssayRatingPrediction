@@ -18,9 +18,9 @@ dict_cmu = cmudict.dict()
 with open("./utils/dict_awl.json") as file:
     dict_awl = json.load(file)
 list_awl = [item for sublist in dict_awl.values() for item in sublist]
+set_awl = set(list_awl)
 
-
-nlp = spacy.load("en_core_web_trf")
+nlp = spacy.load("en_core_web_sm")
 
 
 with open("./utils/dale-chall-word-list.txt", "r") as file:
@@ -35,21 +35,19 @@ with open("./utils/words_alpha.txt") as file:
 lines_clean = [line.replace("\n", "").lower() for line in lines]
 set_word_check = set(lines_clean)
 
+cached_stopwords = set(stopwords.words("english"))
 # Preprocessing
 
 def tokenize_essay(essay):
     return RegexpTokenizer(r"[a-zA-Z0-9]+").tokenize(str.lower(essay))
 
 def lemmatize_essay(essay):
-    text = nlp(essay)
+    text = nlp(essay, disable=["tok2vec", "tagger", "parser", "attribute_ruler", "ner", "tokenizer", "textcat"])
     return [token.lemma_ for token in text]
 
 
 def remove_stop_words(tokens):
-    output = []
-    for word in tokens:
-        if word not in stopwords.words("english"):
-            output.append(word)
+    output = [word for word in tokens if word not in cached_stopwords]
     return output
 
 def remove_punctuation(essay):
@@ -91,12 +89,13 @@ def count_syllables(tokens):
 ## Gunning fog --> complex words ("complex" words consisting of three or more syllables. Do not include proper nouns, familiar jargon, or compound words. Do not include common suffixes (such as -es, -ed, or -ing) as a syllable;)
 ## https://en.wikipedia.org/wiki/Gunning_fog_index
 
-def count_complex_words(tokens):
-    nb_complex_words = 0
-    for word in tokens:
-        if count_syllables(word) >= 3:
-            nb_complex_words += 1
-    return nb_complex_words
+def count_complex_words(tokens): ## à revoir pour améliorer la performance
+    # nb_complex_words = 0
+    # for word in tokens:
+    #     if count_syllables(word) >= 3:
+    #         nb_complex_words += 1
+    #return nb_complex_words
+    return len([word for word in tokens if count_syllables(word)>=3])
 
 
 
@@ -127,7 +126,7 @@ def count_dale_chall_difficult_words(tokens):
 ## Words sophistication thanks to a corpus (AWL)
 
 def count_awl_words(tokens):
-    return len([word for word in tokens if word in list_awl])
+    return len([word for word in tokens if word in set_awl])
 
 ## Words frequency (tf-idf)
 ## I'm not sure we should use this measure, beaucause it seems field related

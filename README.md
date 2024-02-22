@@ -5,6 +5,7 @@ Welcome to the Essay Rating Prediction project repository! This project focuses 
 
 ```bash
 python -m spacy download en_core_web_trf
+python -m spacy download en_core_web_sm
 ```
 
 ## Sources
