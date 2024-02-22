@@ -5,3 +5,5 @@ matplotlib
 seaborn
 pyspellchecker
 gensim
+pyphen
+spacy
