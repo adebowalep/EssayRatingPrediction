@@ -6,3 +6,13 @@ Welcome to the Essay Rating Prediction project repository! This project focuses 
 ```bash
 python -m spacy download en_core_web_trf
 ```
+
+## Sources
+
+### Spell checker
+https://sourceforge.net/projects/wordlist/
+http://wordlist.aspell.net
+
+### Wordlist
+
+https://github.com/dwyl/english-words
