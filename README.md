@@ -17,3 +17,6 @@ http://wordlist.aspell.net
 ### Wordlist
 
 https://github.com/dwyl/english-words
+
+### Transition words
+https://www.textcompare.org/readability/transition-words
