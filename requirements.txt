@@ -5,10 +5,15 @@ matplotlib
 seaborn
 pyspellchecker
 gensim
+xgboost
+gensim
 pyphen
 spacy
 scikit-learn
 dask
+<<<<<<< HEAD
 textstat
 xgboost
 streamlit
+=======
+>>>>>>> 70896432dd832258494733ef400cc4cde0b0c863
