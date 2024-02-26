@@ -3,6 +3,7 @@ import nltk
 import json
 import string
 import pyphen
+import re
 
 
 from nltk import sent_tokenize, word_tokenize, pos_tag, RegexpParser
@@ -36,6 +37,8 @@ set_tags = set(['LS', 'TO', 'VBN', 'WP', 'UH', 'VBG', 'JJ', 'VBZ', 'VBP', 'NN', 
                   'JJS', 'PDT', 'MD', 'VB', 'WRB', 'NNP', 'EX', 'NNS', 'SYM', 'CC', 'CD', 'POS'])
 
 english_words = set(words.words())
+
+cached_stopwords = set(stopwords.words("english"))
 
 def get_flesch_reading_ease(text: str):
     return textstat.flesch_reading_ease(text)
@@ -165,3 +168,12 @@ def count_words(text):
 def count_sentences(text):
     sentences = sent_tokenize(text)
     return len(sentences)
+
+def count_tagged_entity(text):
+    tokens = word_tokenize(text)
+    return len(re.findall(r'@(\w+)', text))/len(tokens)
+
+def count_stop_words(text):
+    tokens = word_tokenize(text)
+    output = [word for word in tokens if word in cached_stopwords]
+    return len(output)/len(tokens)
