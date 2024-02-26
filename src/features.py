@@ -177,3 +177,13 @@ def count_stop_words(text):
     tokens = word_tokenize(text)
     output = [word for word in tokens if word in cached_stopwords]
     return len(output)/len(tokens)
+
+def count_quoted_words(text):
+    tokens = word_tokenize(text)
+    text = text.replace("'s", "")
+    array = re.findall("(?<![\\w'])'([^']*)'(?!(?:'s|\\w))", text)
+    array = [word_tokenize(x) for x in array]
+    array = [item for sublist in array for item in sublist]
+    array = [[char for char in token if char not in string.punctuation] for token in array]
+    array = [item for item in array if len(item)>0]
+    return len(array)/len(tokens)
