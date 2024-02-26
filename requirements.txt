@@ -9,3 +9,6 @@ pyphen
 spacy
 scikit-learn
 dask
+textstat
+xgboost
+streamlit
