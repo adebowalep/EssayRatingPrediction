@@ -187,3 +187,7 @@ def count_quoted_words(text):
     array = [[char for char in token if char not in string.punctuation] for token in array]
     array = [item for item in array if len(item)>0]
     return len(array)/len(tokens)
+
+def count_tabs(text):
+    array = re.findall('(?<! ) {5,6}(?! )', text)
+    return len(array)
