@@ -32,6 +32,15 @@ with open("./utils/set_slur_words.json") as file:
     list_slur_words = json.load(file)
     set_slur_words = set(list_awl)
 
+with open("./utils/bnc_coca_dict.json") as file:
+    frequency_dict = json.load(file)
+
+with open("./utils/words_alpha.txt") as file:
+    lines = file.readlines()
+
+lines_clean = [line.replace("\n", "").lower() for line in lines]
+set_word_check = set(lines_clean)
+
 set_tags = set(['LS', 'TO', 'VBN', 'WP', 'UH', 'VBG', 'JJ', 'VBZ', 'VBP', 'NN', 'DT', 'PRP', 
                 'WP$', 'NNPS', 'PRP$', 'WDT', 'RB', 'RBR', 'RBS', 'VBD', 'IN', 'FW', 'RP', 'JJR',
                   'JJS', 'PDT', 'MD', 'VB', 'WRB', 'NNP', 'EX', 'NNS', 'SYM', 'CC', 'CD', 'POS'])
@@ -188,6 +197,30 @@ def count_quoted_words(text):
     array = [item for item in array if len(item)>0]
     return len(array)/len(tokens)
 
-def count_tabs(text):
-    array = re.findall('(?<! ) {5,6}(?! )', text)
-    return len(array)
+
+def _remove_punctuation(text):
+    text = text.replace("/", " ")
+    text = text.replace("(", " ")
+    text = text.replace(")", " ")
+    text = text.replace("  ", " ")
+    return re.sub(r'[^\w\s]', '', text)
+
+def _remove_special_words(text):
+    return re.sub(r'@\w+', '', text)
+
+def get_word_frequency(text):
+    text = _remove_special_words(text)
+    text = _remove_punctuation(text)
+    tokens = word_tokenize(text.lower())
+    # if the word is not in set_word_check, it should be a mispelled word so we ignore it
+    freq_tokens= [(token, frequency_dict.get(token)) for token in tokens if token in set_word_check]
+    list_values = [val for val in set(frequency_dict.values())]
+    list_values.append(None)
+    frequencies = {}
+    for val in list_values:
+        if val == None:
+            frequencies.update({"others": len([i for x,i in freq_tokens if i==val])/len(tokens)})
+        else:
+            frequencies.update({val: len([i for x,i in freq_tokens if i==val])/len(tokens)})
+    frequencies = dict(sorted(frequencies.items()))
+    return frequencies

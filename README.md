@@ -20,3 +20,9 @@ https://github.com/dwyl/english-words
 
 ### Transition words
 https://www.textcompare.org/readability/transition-words
+
+### Slur word list
+https://github.com/surge-ai/profanity/blob/main/profanity_en.csv
+
+### Frequency list
+https://www.eapfoundation.com/vocab/general/bnccoca/#listfreq
