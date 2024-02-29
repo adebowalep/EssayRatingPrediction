@@ -4,6 +4,7 @@ import json
 import string
 import pyphen
 import re
+import spacy
 
 
 from nltk import sent_tokenize, word_tokenize, pos_tag, RegexpParser
@@ -18,24 +19,26 @@ nltk.download('stopwords')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('words')
 
+nlp = spacy.load("en_core_web_sm")
+
 dict_cmu = cmudict.dict()
 
 pyphen.language_fallback('en_GB')
 dic = pyphen.Pyphen(lang='en_GB')
 
-with open("./utils/dict_awl.json") as file:
+with open("src/utils/dict_awl.json") as file:
     dict_awl = json.load(file)
 list_awl = [item for sublist in dict_awl.values() for item in sublist]
 set_awl = set(list_awl)
 
-with open("./utils/set_slur_words.json") as file:
+with open("src/utils/set_slur_words.json") as file:
     list_slur_words = json.load(file)
     set_slur_words = set(list_awl)
 
-with open("./utils/bnc_coca_dict.json") as file:
+with open("src/utils/bnc_coca_dict.json") as file:
     frequency_dict = json.load(file)
 
-with open("./utils/words_alpha.txt") as file:
+with open("src/utils/words_alpha.txt") as file:
     lines = file.readlines()
 
 lines_clean = [line.replace("\n", "").lower() for line in lines]
@@ -94,22 +97,30 @@ def get_pos_tags(text):
     pos_tags = nltk.pos_tag(tokens)
     res = [x[1] for x in pos_tags]
     for a in set_tags:
-        dict_pos_tags.update({a: res.count(a)/count_words})
+        dict_pos_tags.update({"freq_"+a: res.count(a)/count_words})
     dict_pos_tags = dict(sorted(dict_pos_tags.items()))
     return dict_pos_tags
 
 def get_sentence_tree_roots(text):
-    words = word_tokenize(text)
-    pos_tags = pos_tag(words)
-    grammar = "NP: {<DT>?<JJ>*<NN>}"
-    chunk_parser = RegexpParser(grammar)
-    tree = chunk_parser.parse(pos_tags)
-    roots = [subtree.label() for subtree in tree.subtrees() if subtree.label() == 'NP']
-    return roots
+    doc = nlp(text)
+    roots = [(token.tag_) for token in doc if token.dep_ == "ROOT"]
+    set_roots = set(roots)
+    dict_roots_tags = {}
+    for item in set_roots:
+        dict_roots_tags.update({"roots_"+item: roots.count(item)})
+    return dict_roots_tags
 
-def get_sentence_tree_length(text):
-    sentences = sent_tokenize(text)
-    return len(sentences)
+def _tree_height(root):
+    if not list(root.children):
+        return 1
+    else:
+        return 1 + max(_tree_height(x) for x in root.children)
+
+
+def get_average_heights(text):
+    doc = nlp(text)
+    roots = [sent.root for sent in doc.sents]
+    return (sum([_tree_height(root) for root in roots])/len(roots))
 
 def get_average_connections_at_root(text):
     words = word_tokenize(text)
