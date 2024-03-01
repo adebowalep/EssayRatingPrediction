@@ -181,6 +181,20 @@ def count_syllables(text):
             nb_syl += len(string)
     return nb_syl
 
+def ratio_monosyllable(text):
+    res = 0
+    tokens = word_tokenize(text)
+    for word in tokens:
+        try:
+            if _nsyl(word) == 1:
+                res = res + 1
+        except:
+            string = dic.inserted(word)
+            string = string.split("-")
+            if len(string) == 1:
+                res = res + 1
+    return res/len(tokens)
+
 def count_words(text):
     tokens = word_tokenize(text)
     return len(tokens)
@@ -230,8 +244,8 @@ def get_word_frequency(text):
     frequencies = {}
     for val in list_values:
         if val == None:
-            frequencies.update({"others": len([i for x,i in freq_tokens if i==val])/len(tokens)})
+            frequencies.update({"rarer_freq_words": len([i for x,i in freq_tokens if i==val])/len(tokens)})
         else:
-            frequencies.update({val: len([i for x,i in freq_tokens if i==val])/len(tokens)})
+            frequencies.update({val+"k_freq_words": len([i for x,i in freq_tokens if i==val])/len(tokens)})
     frequencies = dict(sorted(frequencies.items()))
     return frequencies
