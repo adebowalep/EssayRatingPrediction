@@ -179,7 +179,7 @@ def count_syllables(text):
             string = dic.inserted(word)
             string = string.split("-")
             nb_syl += len(string)
-    return nb_syl
+    return nb_syl/len(tokens)
 
 def ratio_monosyllable(text):
     res = 0
