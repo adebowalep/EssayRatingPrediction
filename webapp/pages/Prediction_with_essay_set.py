@@ -2,9 +2,19 @@ import streamlit as st
 import pandas as pd
 from src.webapp_features import *
 import joblib
+import pickle
 
 # st.set_page_config(initial_sidebar_state="collapsed")
-model = joblib.load("../src/models/xgb_regressor.joblib")
+with open("../models/essay_set_classification_model.pkl", "rb") as file:
+    classification_model = pickle.load(file)
+
+
+with open("../models/doman1_score_regression_model.pkl", "rb") as file:
+    domain1_score_model = pickle.load(file)
+
+with open("../models/doman2_score_regression_model.pkl", "rb") as file:
+    domain2_score_model = pickle.load(file)
+
 st.set_page_config(layout = "wide")
 
 sample_essay = """
@@ -43,9 +53,24 @@ def display_essay(user_input):
         df = pd.DataFrame(data, index=[0])
         df = feature_engineering(df)
         df = df.drop(["essay"], axis=1)
-        print(df.columns)
-        predictions = model.predict(df)
-        print(predictions)
+        class_pred = classification_model.predict(df)
+        df["essay_set"] = class_pred
+        st.session_state["predicted_essay_set"]= class_pred
+        domain1_pred = domain1_score_model.predict(df)
+        df_domain1 = df.copy()
+        df_domain1["pred"] = domain1_pred
+        tmp_df = df_domain1[["essay_set", "pred"]].copy()
+        tmp_df["reversed_pred"] = tmp_df.apply(reverse_scaling, axis=1)
+        df_domain1["reversed_pred"] = tmp_df["reversed_pred"]
+        st.session_state["predicted_domain1_grade"] = df_domain1["reversed_pred"]
+        if class_pred == 2:
+            df_domain2 = df.copy().drop(columns="essay_set")
+            domain2_pred = domain2_score_model.predict(df_domain2)
+            df_domain2["pred"] = domain2_pred
+            tmp_df = df_domain2[["pred"]].copy()
+            tmp_df["reversed_pred"] = tmp_df.apply(reverse_scaling_2, axis=1)
+            df_domain2["reversed_pred"] = tmp_df["reversed_pred"]
+            st.session_state["predicted_domain2_grade"] = df_domain2["reversed_pred"]
         
     else:
         st.error("Your essay is too short to be analyzed", icon="⚠️")
@@ -76,8 +101,10 @@ if "linsear_write_formula" not in st.session_state:
     st.session_state["linsear_write_formula"] = None
 if "predicted_essay_set" not in st.session_state:
     st.session_state["predicted_essay_set"] = None
-if "predicted_grade" not in st.session_state:
-    st.session_state["predicted_grade"] = None
+if "predicted_domain1_grade" not in st.session_state:
+    st.session_state["predicted_domain1_grade"] = None
+if "predicted_domain2_grade" not in st.session_state:
+    st.session_state["predicted_domain2_grade"] = None
 
 if "count_characters" not in st.session_state:
     st.session_state["count_characters"] = None
@@ -156,4 +183,5 @@ with col2:
             st.metric(label="Lexical diversity", value=st.session_state["lexical_diversity"], help="The ratio of unique words on the entire essay")
     with tab3:
         st.metric("Predicted Essay Set", value=st.session_state["predicted_essay_set"])
-        st.metric("Predicted Grade", value=st.session_state["predicted_grade"])
+        st.metric("Predicted Domain 1 score", value=st.session_state["predicted_domain1_grade"])
+        st.metric("Predicted Domain 2 score", value=st.session_state["predicted_domain2_grade"])

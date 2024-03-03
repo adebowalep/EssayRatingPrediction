@@ -6,7 +6,8 @@ import pyphen
 import re
 import spacy
 import pandas as pd
-
+import pickle
+import numpy as np
 
 from nltk import sent_tokenize, word_tokenize, pos_tag, RegexpParser
 from nltk.corpus import stopwords
@@ -130,6 +131,9 @@ dict_spacy_tags = {
     "BES": 'auxiliary "be"',
     "HVS": 'forms of "have"',
     "_SP": "whitespace"}
+
+with open("../models/scalers_dict.pkl", "rb") as file:
+    scalers_dict = pickle.load(file)
 
 def get_flesch_reading_ease(text: str):
     return textstat.flesch_reading_ease(text)
@@ -396,7 +400,19 @@ def feature_engineering(df):
     tmp_df = pd.json_normalize(tmp_df)
     tmp_df.fillna(0, inplace=True)
     df = df.join(tmp_df, how="left")
-    
-    # with open("processed_data.pickle", "rb") as file:
-    #     df = pickle.load(file)
     return df
+
+def reverse_scaling(row):
+    scaler_key = f'domain1_essay_set_{int(row["essay_set"])}'
+    scaler = scalers_dict[scaler_key]
+    inversed_pred = scaler.inverse_transform([[row['pred']]])[0][0]
+
+    rounded_pred = np.round(inversed_pred)
+    return rounded_pred
+
+def reverse_scaling_2(row):
+    scaler_key = 'domain2'
+    scaler = scalers_dict[scaler_key]
+    inversed_pred = scaler.inverse_transform([[row['pred']]])[0][0]
+    rounded_pred = np.round(inversed_pred)
+    return rounded_pred

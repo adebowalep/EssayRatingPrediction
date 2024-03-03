@@ -14,6 +14,8 @@ dask
 textstat
 xgboost
 streamlit
-json
 pyphen
 joblib
+plotly
+imblearn
+nbformat
