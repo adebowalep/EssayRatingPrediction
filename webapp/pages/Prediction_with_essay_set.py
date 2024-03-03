@@ -1,8 +1,10 @@
 import streamlit as st
 import pandas as pd
 from src.webapp_features import *
+import joblib
 
 # st.set_page_config(initial_sidebar_state="collapsed")
+model = joblib.load("../src/models/xgb_regressor.joblib")
 st.set_page_config(layout = "wide")
 
 sample_essay = """
@@ -37,6 +39,13 @@ def display_essay(user_input):
         st.session_state["count_punctuation"] = count_punctuation(user_input)
         st.session_state["count_stopwords"] = count_stop_words(user_input)
         st.session_state["lexical_diversity"] = round(calculate_lexical_diversity(user_input),2)
+        data = {"essay": user_input}
+        df = pd.DataFrame(data, index=[0])
+        df = feature_engineering(df)
+        df = df.drop(["essay"], axis=1)
+        print(df.columns)
+        predictions = model.predict(df)
+        print(predictions)
         
     else:
         st.error("Your essay is too short to be analyzed", icon="⚠️")

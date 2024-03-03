@@ -5,6 +5,7 @@ import string
 import pyphen
 import re
 import spacy
+import pandas as pd
 
 
 from nltk import sent_tokenize, word_tokenize, pos_tag, RegexpParser
@@ -51,6 +52,84 @@ set_tags = set(['LS', 'TO', 'VBN', 'WP', 'UH', 'VBG', 'JJ', 'VBZ', 'VBP', 'NN', 
 english_words = set(words.words())
 
 cached_stopwords = set(stopwords.words("english"))
+
+dict_spacy_tags = {
+    "ADJ": "adjective",
+    "ADP": "adposition",
+    "ADV": "adverb",
+    "AUX": "auxiliary",
+    "CONJ": "conjunction",
+    "CCONJ": "coordinating conjunction",
+    "DET": "determiner",
+    "INTJ": "interjection",
+    "NOUN": "noun",
+    "NUM": "numeral",
+    "PART": "particle",
+    "PRON": "pronoun",
+    "PROPN": "proper noun",
+    "PUNCT": "punctuation",
+    "SCONJ": "subordinating conjunction",
+    "SYM": "symbol",
+    "VERB": "verb",
+    "X": "other",
+    "EOL": "end of line",
+    "SPACE": "space",
+    ".": "punctuation mark, sentence closer",
+    ",": "punctuation mark, comma",
+    "-LRB-": "left round bracket",
+    "-RRB-": "right round bracket",
+    "``": "opening quotation mark",
+    '""': "closing quotation mark",
+    "''": "closing quotation mark",
+    ":": "punctuation mark, colon or ellipsis",
+    "$": "symbol, currency",
+    "#": "symbol, number sign",
+    "AFX": "affix",
+    "CC": "conjunction, coordinating",
+    "CD": "cardinal number",
+    "DT": "determiner",
+    "EX": "existential there",
+    "FW": "foreign word",
+    "HYPH": "punctuation mark, hyphen",
+    "IN": "conjunction, subordinating or preposition",
+    "JJ": "adjective (English), other noun-modifier (Chinese)",
+    "JJR": "adjective, comparative",
+    "JJS": "adjective, superlative",
+    "LS": "list item marker",
+    "MD": "verb, modal auxiliary",
+    "NIL": "missing tag",
+    "NN": "noun, singular or mass",
+    "NNP": "noun, proper singular",
+    "NNPS": "noun, proper plural",
+    "NNS": "noun, plural",
+    "PDT": "predeterminer",
+    "POS": "possessive ending",
+    "PRP": "pronoun, personal",
+    "PRP$": "pronoun, possessive",
+    "RB": "adverb",
+    "RBR": "adverb, comparative",
+    "RBS": "adverb, superlative",
+    "RP": "adverb, particle",
+    "TO": 'infinitival "to"',
+    "UH": "interjection",
+    "VB": "verb, base form",
+    "VBD": "verb, past tense",
+    "VBG": "verb, gerund or present participle",
+    "VBN": "verb, past participle",
+    "VBP": "verb, non-3rd person singular present",
+    "VBZ": "verb, 3rd person singular present",
+    "WDT": "wh-determiner",
+    "WP": "wh-pronoun, personal",
+    "WP$": "wh-pronoun, possessive",
+    "WRB": "wh-adverb",
+    "SP": "space (English), sentence-final particle (Chinese)",
+    "ADD": "email",
+    "NFP": "superfluous punctuation",
+    "GW": "additional word in multi-word expression",
+    "XX": "unknown",
+    "BES": 'auxiliary "be"',
+    "HVS": 'forms of "have"',
+    "_SP": "whitespace"}
 
 def get_flesch_reading_ease(text: str):
     return textstat.flesch_reading_ease(text)
@@ -106,7 +185,7 @@ def get_sentence_tree_roots(text):
     roots = [(token.tag_) for token in doc if token.dep_ == "ROOT"]
     set_roots = set(roots)
     dict_roots_tags = {}
-    for item in set_roots:
+    for item in dict_spacy_tags.keys():
         dict_roots_tags.update({"roots_"+item: roots.count(item)})
     return dict_roots_tags
 
@@ -271,3 +350,53 @@ def get_word_frequency(text):
             frequencies.update({val+"k_freq_words": len([i for x,i in freq_tokens if i==val])/len(tokens)})
     frequencies = dict(sorted(frequencies.items()))
     return frequencies
+
+
+def feature_engineering(df):
+    df["count_characters"] = df["essay"].apply(lambda x: count_characters(x))
+    df["count_syllables"] = df["essay"].apply(lambda x: count_syllables(x))
+    df["ratio_monosyllable"] = df["essay"].apply(lambda x: ratio_monosyllable(x))
+    df["count_words"] = df["essay"].apply(lambda x: count_words(x))
+    df["count_sentences"] = df["essay"].apply(lambda x: count_sentences(x))
+    df["flesch_reading_ease"] = df["essay"].apply(lambda x: get_flesch_reading_ease(x))
+    df["gunning_fog"] = df["essay"].apply(lambda x: get_gunning_fog(x))
+    df["automated_readability_index"] = df["essay"].apply(lambda x: get_automated_readability_index(x))
+    df["smog_index"] = df["essay"].apply(lambda x: get_smog_index(x))
+    df["flesch_kincaid_grade"] = df["essay"].apply(lambda x: get_flesch_kincaid_grade(x))
+    df["coleman_liau_index"] = df["essay"].apply(lambda x: get_coleman_liau_index(x))
+    df["dale_chall_readability_score"] = df["essay"].apply(lambda x: get_dale_chall_readability_score(x))
+    df["automated_readability_index"] = df["essay"].apply(lambda x: get_automated_readability_index(x))
+    df["dale_chall_readability_score"] = df["essay"].apply(lambda x: get_dale_chall_readability_score(x))
+    df["difficult_words"] = df["essay"].apply(lambda x: get_difficult_words(x))
+    df["linsear_write_formula"] = df["essay"].apply(lambda x: get_linsear_write_formula(x))
+    df["count_awl_words"] = df["essay"].apply(lambda x: count_awl_words(x))
+    df["calculate_lexical_diversity"] = df["essay"].apply(lambda x: calculate_lexical_diversity(x))
+    df["get_average_heights"] = df["essay"].apply(lambda x: get_average_heights(x))
+    df["get_average_connections_at_root"] = df["essay"].apply(lambda x: get_average_connections_at_root(x))
+    df["get_length_of_clauses"] = df["essay"].apply(lambda x: get_length_of_clauses(x))
+    df["calculate_misspelling_score"] = df["essay"].apply(lambda x: calculate_misspelling_score(x))
+    df["detect_slur_usage"] = df["essay"].apply(lambda x: detect_slur_usage(x))
+    df["calculate_overusage_of_punctuation"] = df["essay"].apply(lambda x: calculate_overusage_of_punctuation(x))
+    df["count_tagged_entity"] = df["essay"].apply(lambda x: count_tagged_entity(x))
+    df["count_stop_words"] = df["essay"].apply(lambda x: count_stop_words(x))
+    df["count_quoted_words"] = df["essay"].apply(lambda x: count_quoted_words(x))
+
+    tmp_df = pd.DataFrame()
+    tmp_df = df["essay"].apply(lambda x: get_pos_tags(x))
+    tmp_df = pd.json_normalize(tmp_df)
+    df = df.join(tmp_df, how="left")
+
+    tmp_df = pd.DataFrame()
+    tmp_df = df["essay"].apply(lambda x: get_word_frequency(x))
+    tmp_df = pd.json_normalize(tmp_df)
+    df = df.join(tmp_df, how="left")
+
+    tmp_df = pd.DataFrame()
+    tmp_df = df["essay"].apply(lambda x: get_sentence_tree_roots(x))
+    tmp_df = pd.json_normalize(tmp_df)
+    tmp_df.fillna(0, inplace=True)
+    df = df.join(tmp_df, how="left")
+    
+    # with open("processed_data.pickle", "rb") as file:
+    #     df = pickle.load(file)
+    return df

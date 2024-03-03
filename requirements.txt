@@ -16,3 +16,4 @@ xgboost
 streamlit
 json
 pyphen
+joblib
