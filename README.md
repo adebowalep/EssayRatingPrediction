@@ -4,13 +4,8 @@ Welcome to the Essay Rating Prediction project repository! This project focuses 
 ## Command to run
 
 ```bash
+python -m spacy download en_core_web_trf
 python -m spacy download en_core_web_sm
-```
-
-## Command to run streamlit app
-```bash
-cd webapp
-streamlit run Introduction.py
 ```
 
 ## Sources
