@@ -9,10 +9,10 @@ with open("../models/essay_set_classification_model.pkl", "rb") as file:
     classification_model = pickle.load(file)
 
 
-with open("../models/doman1_score_regression_model.pkl", "rb") as file:
+with open("../models/domain1_score_regression_model.pkl", "rb") as file:
     domain1_score_model = pickle.load(file)
 
-with open("../models/doman2_score_regression_model.pkl", "rb") as file:
+with open("../models/domain2_score_regression_model.pkl", "rb") as file:
     domain2_score_model = pickle.load(file)
 
 st.set_page_config(layout = "wide")
