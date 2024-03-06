@@ -53,7 +53,7 @@ def display_essay(user_input):
         df = pd.DataFrame(data, index=[0])
         df = feature_engineering(df)
         df = df.drop(["essay"], axis=1)
-        class_pred = classification_model.predict(df)
+        class_pred = classification_model.predict(df) + 1
         df["essay_set"] = class_pred
         st.session_state["predicted_essay_set"]= class_pred
         domain1_pred = domain1_score_model.predict(df)
